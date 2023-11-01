@@ -81,7 +81,47 @@ DELIMITER ;
 
 CALL sp_room_schedule('R101');
 
+DROP PROCEDURE IF EXISTS sp_department_schedule;
 
+DELIMITER $$
+
+CREATE PROCEDURE sp_department_schedule(IN Usr_dpt_name VARCHAR(35))
+BEGIN
+    DECLARE new_department_id INT;
+    
+    -- Get the department_id for the provided department_name
+    SELECT department_id INTO new_department_id
+    FROM Department
+    WHERE department_name = Usr_dpt_name
+    LIMIT 1;
+    
+    IF new_department_id IS NOT NULL THEN
+        SELECT
+            day_of_week,
+            start_time,
+            end_time,
+            Room.room_name,
+            Lecturer.first_name,
+            Lecturer.last_name,
+            Course.course_name,
+            Subject.subject_name
+        FROM Class
+        INNER JOIN Room ON Class.room_num = Room.room_num
+        INNER JOIN Lecturer ON Class.lecturer_id = Lecturer.lecturer_id
+        INNER JOIN Course ON Class.course_id = Course.course_id
+        INNER JOIN Subject ON Class.subject_code = Subject.subject_code
+        WHERE Course.department_id = new_department_id
+        ORDER BY day_of_week, start_time;
+    ELSE
+        -- Handle the case when the department is not found
+        SELECT 'Department not found' AS Error;
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+CALL sp_department_schedule('Computer Science');
 -- Total number of hours a lecturer has with a group in one week
 -- Total number of a hours lecturer has with all groups in one week
 -- Total number of a hours a group has for a particular subject in one week

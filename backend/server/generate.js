@@ -3,16 +3,12 @@ const math = require("mathjs");
 
 // Define the parameters of the genetic algorithm
 const options = {
-	// The size of the population
-	size: 100,
-	// The probability of crossover
-	crossover: 0.8,
-	// The probability of mutation
-	mutation: 0.2,
-	// The maximum number of iterations
-	iterations: 1000,
-	// The optimization type (maximize or minimize the fitness function)
-	optimize: "maximize",
+	size: 100, // The size of the population
+	crossover: 0.8, // The probability of crossover
+	mutation: 0.2, // The probability of mutation
+	iterations: 100, // The maximum number of iterations
+	optimize: "maximize", // The optimization type (maximize or minimize the fitness function)
+
 	// The selection type (roulette, tournament, etc.)
 	select1: "roulette",
 	select2: "roulette",
@@ -20,14 +16,11 @@ const options = {
 
 // Define the data for the timetable generator
 const data = {
-	// The number of classes to schedule
-	numClasses: 50,
-	// The number of rooms available
-	numRooms: 10,
-	// The number of lecturers available
-	numLecturers: 20,
-	// The number of batches available
-	numBatches: 10,
+	numClasses: 50, // The number of classes to schedule
+	numRooms: 10, // The number of rooms available
+	numLecturers: 20, // The number of lecturers available
+	numBatches: 10, // The number of batches available
+
 	// The mapping of class ids to subject codes
 	classSubject: {
 		1: "CS101",
@@ -116,7 +109,7 @@ const seed = function () {
 	// Loop through the number of classes to schedule
 	for (let i = 0; i < data.numClasses; i++) {
 		// Generate a random class id from 1 to numClasses
-		const classId = Math.floor(Math.random() * data.numClasses) + 1;
+		const classId = i + 1; // Fixed this line
 		// Generate a random room number from R1 to R10
 		const roomNum = "R" + (Math.floor(Math.random() * data.numRooms) + 1);
 		// Generate a random lecturer id from 1 to numLecturers
@@ -319,39 +312,60 @@ const mutation = function (solution) {
 			// Mutate the attribute with a random value
 			switch (attribute) {
 				case "classId":
-					solution[i].classId = Math.floor(Math.random() * data.numClasses) + 1;
+					if (solution[i]) {
+						solution[i].classId =
+							Math.floor(Math.random() * data.numClasses) + 1;
+					}
 					break;
 				case "roomNum":
-					solution[i].roomNum =
-						"R" + (Math.floor(Math.random() * data.numRooms) + 1);
+					if (solution[i]) {
+						solution[i].roomNum =
+							"R" + (Math.floor(Math.random() * data.numRooms) + 1);
+					}
 					break;
 				case "lecturerId":
-					solution[i].lecturerId =
-						Math.floor(Math.random() * data.numLecturers) + 1;
+					if (solution[i]) {
+						solution[i].lecturerId =
+							Math.floor(Math.random() * data.numLecturers) + 1;
+					}
 					break;
 				case "batchCode":
-					solution[i].batchCode = Object.keys(data.batchCourse)[
-						Math.floor(Math.random() * data.numBatches)
-					];
+					if (solution[i]) {
+						solution[i].batchCode = Object.keys(data.batchCourse)[
+							Math.floor(Math.random() * data.numBatches)
+						];
+					}
 					break;
 				case "startTime":
-					do {
-						startHour = Math.floor(Math.random() * 9) + 8;
-					} while (startHour === 12);
-					solution[i].startTime = startHour + ":00:00";
+					if (solution[i] && solution[i].classId) {
+						do {
+							startHour = Math.floor(Math.random() * 9) + 8;
+						} while (startHour === 12);
+						solution[i].startTime = startHour + ":00:00";
+					}
 					break;
 				case "endTime":
-					const classDuration = data.subjectLab[
-						data.classSubject[solution[i].classId]
-					]
-						? 3
-						: 2;
-					const endHour = startHour + classDuration;
-					solution[i].endTime = endHour + ":00:00";
+					if (solution[i] && solution[i].classId) {
+						const classDuration = data.subjectLab[
+							data.classSubject[solution[i].classId]
+						]
+							? 3
+							: 2;
+						const endHour = startHour + classDuration;
+						solution[i].endTime = endHour + ":00:00";
+					}
 					break;
 				case "dayOfWeek":
-					const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-					solution[i].dayOfWeek = days[Math.floor(Math.random() * 5)];
+					if (solution[i]) {
+						const days = [
+							"Monday",
+							"Tuesday",
+							"Wednesday",
+							"Thursday",
+							"Friday",
+						];
+						solution[i].dayOfWeek = days[Math.floor(Math.random() * 5)];
+					}
 					break;
 			}
 		}
@@ -515,7 +529,7 @@ const main = function () {
 			population[j] = mutatedOffspring;
 		}
 		// Print the current iteration and the best fitness score
-		console.log("Iteration " + (i + 1) + ": Best fitness = " + bestFitness);
+		console.log("Generating ..." );
 	}
 	// Print the final solution and its fitness score
 	console.log("Final solution: " + JSON.stringify(bestSolution));
